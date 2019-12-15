@@ -14,9 +14,11 @@ namespace arduino_clock {
     class Time {
     public:
         bool changed;
+
         uint8_t hour;
         uint8_t minute;
         uint8_t second;
+
     private:
         char _buffer[9];
 
@@ -47,6 +49,16 @@ namespace arduino_clock {
             _format(second, 6); // 67
             _buffer[8] = 0;
             return _buffer;
+        }
+        const char *format_hour() {
+            _format(second, 0);
+            _buffer[2] = 0;
+            return &_buffer[0];
+        }
+        const char *format_minute() {
+            _format(second, 3);
+            _buffer[5] = 0;
+            return &_buffer[3];
         }
         const char *format_second() {
             _format(second, 6);

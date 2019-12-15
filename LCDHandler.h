@@ -61,7 +61,7 @@ namespace arduino_clock {
             _displayMode = mode;
         }
         void setMode(Mode mode, Time *_t) {
-            _print_time = _t;
+            _printable_time = _t;
             if (mode != Mode::Setup) {
                 if (IsDebug()) {
                     cerror("only setup mode with print_time");
@@ -79,6 +79,30 @@ namespace arduino_clock {
                 return;
             }
             traceln("set display to setup mode");
+        }
+        enum class Position {
+            Hour   = 0b001,
+            Minute = 0b010,
+            Second = 0b100
+        };
+        void setPosition(const Position &p) {
+#if defined(_DEBUG)
+            traceln("Position changed to ");
+            switch (p) {
+                case Position::Hour:
+                    traceln("Hour");
+                    break;
+                case Position::Minute:
+                    traceln("Minute");
+                    break;
+                case Position::Second:
+                    traceln("Second");
+                    break;
+                default:
+                    break;
+            }
+#endif
+            current_change_position = p;
         }
 
     public:
@@ -98,8 +122,11 @@ namespace arduino_clock {
 
             _frame_rendered = false;
             setMode(Mode::Clock);
-            _print_time = &_t;
+            _printable_time = &_t;
             _time = &_t;
+
+            blink = false;
+            current_change_position = Position::Hour;
         }
         void render() {
             if (is_delay()) {
@@ -125,7 +152,7 @@ namespace arduino_clock {
                             _renderFrame();
                             _frame_rendered = true;
                         }
-                        print_time();
+                        print_setup_time();
                         printDHT();
                         break;
                     default:
@@ -170,8 +197,8 @@ namespace arduino_clock {
         void __render_frame_temperature() const __attribute__((always_inline)) {
             __print__(9, 0, _face_icon);
             __print__(14, 0,
-                        "\xDF"
-                        "C");
+                      "\xDF"
+                      "C");
         }
         void __render_frame_humidity() const __attribute__((always_inline)) {
             __print__(9, 1, Icon::WaterDrop);
@@ -184,12 +211,56 @@ namespace arduino_clock {
             __render_frame_humidity();
         }
         void print_time() {
-            if (_print_time->is_change() == true) {
-                _print_time->disable_change_flag();
-                __print__(0, 0, _print_time->format());
+            if (_printable_time->is_change() == true) {
+                _printable_time->disable_change_flag();
+                __print__(0, 0, _printable_time->format());
             }
             else {
-                __print__(6, 0, _print_time->format_second());
+                __print__(6, 0, _printable_time->format_second());
+            }
+        }
+
+        const char *_blink(const Position &p, const char *fmt) {
+            traceln("blink is called");
+            if (current_change_position == p) {
+                static byte count = 0;
+                ++count;
+                if (count > 2) {
+                    blink = !blink;
+                    count = 0;
+                }
+                if (blink == true) {
+                    return "__";
+                }
+                else {
+                    return fmt;
+                }
+            }
+            else {
+                return fmt;
+            }
+        }
+        void print_setup_time() {
+            if (_printable_time->is_change() == true) {
+                __print__(0, 0, _blink(Position::Hour, _printable_time->format_hour()));
+                __print__(3, 0, _blink(Position::Minute, _printable_time->format_minute()));
+                __print__(6, 0, _blink(Position::Second, _printable_time->format_second()));
+                _printable_time->disable_change_flag();
+            }
+            else {
+                switch(current_change_position) {
+                    case Position::Hour:
+                        __print__(0, 0, _blink(Position::Hour, _printable_time->format_hour()));
+                        break;
+                    case Position::Minute:
+                        __print__(3, 0, _blink(Position::Minute, _printable_time->format_minute()));
+                        break;
+                    case Position::Second:
+                        __print__(6, 0, _blink(Position::Second, _printable_time->format_second()));
+                        break;
+                    default:
+                        break;
+                }
             }
         }
         void printDHT() {
@@ -227,16 +298,17 @@ namespace arduino_clock {
 
     private:
         LiquidCrystal_I2C *lcd;
-        Time *_print_time;
+        Time *_printable_time;
         Time *_time;
+        Position current_change_position;
+        bool blink;
 
         uint32_t _old_time = 0;
         const uint32_t _display_delay = 333;
         Mode _displayMode;
         byte _face_icon;
-        int current_change_position;
         bool _frame_rendered;
     };
-};      // namespace arduino_clock
+};  // namespace arduino_clock
 
 #endif  //! _LCD_HANDLER_H
