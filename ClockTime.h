@@ -14,13 +14,16 @@ namespace arduino_clock {
     class Time {
     public:
         bool changed;
-        int hour;
-        int minute;
-        int second;
+        uint8_t hour;
+        uint8_t minute;
+        uint8_t second;
     private:
         char _buffer[9];
 
     public:
+        Time() {
+            init();
+        }
         void init() {
             changed = true;
             hour = 0;
