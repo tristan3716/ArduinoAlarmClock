@@ -39,9 +39,16 @@ void _trace(T x, Ts ...xs){
 #endif
 
 void cerror(const char *msg){
-    traceln("error : ", msg);
+    traceln("!! critical error : ", msg);
+    delay(1000);
     noInterrupts();
     while(1);
 }
+
+#if defined(_DEBUG)
+#define IsDebug() true
+#else
+#define IsDebug() false
+#endif
 
 #endif //! _TRACE_H
