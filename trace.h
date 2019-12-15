@@ -8,8 +8,8 @@
 #define _TRACE_H
 
 #if defined (_DEBUG)
-#define traceln(fmt, ...) _traceln(fmt, ##__VA_ARGS__)
-#define trace(fmt, ...) _trace(fmt, ##__VA_ARGS__)
+#define traceln(fmt, ...) _loggerln(fmt, ##__VA_ARGS__)
+#define trace(fmt, ...) _logger(fmt, ##__VA_ARGS__)
 #define traceBegin() Serial.begin(9600)
 #else
 #define traceln(fmt, ...)
@@ -19,27 +19,49 @@
 
 #if defined (_DEBUG)
 template <typename T, typename ...Ts>
-void _traceln(T x){
+void _loggerln(T x){
     Serial.println(x);
 }
 template <typename T, typename ...Ts>
-void _traceln(T x, Ts ...xs){
+void _loggerln(T x, Ts ...xs){
     Serial.print(x);
     traceln(xs...);
 }
 template <typename T, typename ...Ts>
-void _trace(T x){
+void _logger(T x){
     Serial.print(x);
 }
 template <typename T, typename ...Ts>
-void _trace(T x, Ts ...xs){
+void _logger(T x, Ts ...xs){
     Serial.print(x);
     trace(xs...);
 }
+#else
+template <typename T, typename ...Ts>
+void _loggerln(T x){
+    Serial.println(x);
+}
+template <typename T, typename ...Ts>
+void _loggerln(T x, Ts ...xs){
+    Serial.print(x);
+    traceln(xs...);
+}
 #endif
+class ReleaseLog {
+public:
+    void init() {
+        Serial.begin(9600);
+    }
+    template <typename T>
+    void log(T x){
+        _loggerln(x);
+    }
+};
+extern ReleaseLog release;
+ReleaseLog release;
 
 void cerror(const char *msg){
-    traceln("!! critical error : ", msg);
+    _loggerln("!! critical error : ", msg);
     delay(1000);
     noInterrupts();
     while(1);

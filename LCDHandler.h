@@ -2,7 +2,7 @@
  *    LCD Handler
  *    2019.12.13 v1 - by Hu
  *        make sekeleton
- *        make print print_time
+ *        make print print_clock_time
  *    2019.12.14 v2 - by Hu
  *        make render()
  *        conceal almost functions except render(), init(), clear(), setMode()
@@ -25,6 +25,9 @@
 namespace arduino_clock {
     class ClockView {
     public:
+        /* ========================================
+        * functions related to mode
+        */
         enum class Mode {
             Alarm,
             Setup,
@@ -33,9 +36,11 @@ namespace arduino_clock {
         void setMode(Mode mode) {
             if (mode == Mode::Setup) {
                 if (IsDebug()) {
-                    cerror("print_time parameters must be passed to switch to setup mode");
+                    cerror("time parameters must be passed to switch to setup mode");
                 }
                 else {
+                    release.log("time parameters must be passed to switch to setup mode");
+                    release.log("the request is ignored");
                     return;
                 }
             }
@@ -51,6 +56,8 @@ namespace arduino_clock {
                         cerror("illegal mode");
                     }
                     else {
+                        release.log("illegal mode");
+                        release.log("the request is ignored");
                         setMode(Mode::Clock);
                         return;
                     }
@@ -64,9 +71,11 @@ namespace arduino_clock {
             _printable_time = _t;
             if (mode != Mode::Setup) {
                 if (IsDebug()) {
-                    cerror("only setup mode with print_time");
+                    cerror("only setup mode with time");
                 }
                 else {
+                    release.log("only setup mode with time");
+                    release.log("the request is ignored");
                     return;
                 }
             }
@@ -75,7 +84,8 @@ namespace arduino_clock {
                 _displayMode = mode;
             }
             else {
-                traceln("already in setup mode. the request is ignored.");
+                release.log("already in setup mode");
+                release.log("the request is ignored");
                 return;
             }
             traceln("set display to setup mode");
@@ -106,6 +116,11 @@ namespace arduino_clock {
         }
 
     public:
+        /* ========================================
+        * externally released functions except that related to mode
+        *   init(Time)
+        *   render()
+        */
         void init(Time &_t) {
             traceBegin();
             traceln("initialize LCD");
@@ -123,7 +138,7 @@ namespace arduino_clock {
             _frame_rendered = false;
             setMode(Mode::Clock);
             _printable_time = &_t;
-            _time = &_t;
+            _clock_time = &_t;
 
             blink = false;
             current_change_position = Position::Hour;
@@ -143,7 +158,7 @@ namespace arduino_clock {
                             _renderFrame();
                             _frame_rendered = true;
                         }
-                        print_time();
+                        print_clock_time();
                         printDHT();
                         break;
                     case Mode::Setup:
@@ -160,12 +175,16 @@ namespace arduino_clock {
                 }
             }
         }
-        void clear() {
-            traceln("clear lcd");
-            lcd->clear();
-        }
+        // __declspec(deprecated)
+        // void clear() {
+        //     traceln("clear lcd");
+        //     lcd->clear();
+        // }
 
     private:
+        /* ========================================
+        * functions that communicate with LCD
+        */
         void __print__(uint8_t x, uint8_t y, const char *msg) const __attribute__((always_inline)) {
             lcd->setCursor(x, y);
             lcd->print(msg);
@@ -190,6 +209,10 @@ namespace arduino_clock {
         // void __setCursor__(int x, int y) const __attribute__((always_inline)) {
         //     lcd->setCursor(x, y);
         // }
+
+        /* ========================================
+        * functions that render frame
+        */
         void __render_frame_time() const __attribute__((always_inline)) {
             __print__(2, 0, ':');
             __print__(5, 0, ':');
@@ -210,7 +233,11 @@ namespace arduino_clock {
             __render_frame_temperature();
             __render_frame_humidity();
         }
-        void print_time() {
+
+        /* ========================================
+        * functions that render time
+        */
+        void print_clock_time() {
             if (_printable_time->is_change() == true) {
                 _printable_time->disable_change_flag();
                 __print__(0, 0, _printable_time->format());
@@ -263,6 +290,10 @@ namespace arduino_clock {
                 }
             }
         }
+
+        /* ========================================
+        * functions that render temperature & humidity
+        */
         void printDHT() {
             float temp = getTemperature();
             float diff = SmileFaceMid - temp;
@@ -288,6 +319,10 @@ namespace arduino_clock {
 
             __print__(10, 1, getHumidity(), 1);
         }
+
+        /* ========================================
+        * functions that check delay
+        */
         inline bool is_delay() {
             if (_old_time + _display_delay < millis()) {
                 _old_time = _old_time + _display_delay;
@@ -298,8 +333,8 @@ namespace arduino_clock {
 
     private:
         LiquidCrystal_I2C *lcd;
-        Time *_printable_time;
-        Time *_time;
+        Time *_printable_time; // replaceable in setup
+        Time *_clock_time;
         Position current_change_position;
         bool blink;
 
