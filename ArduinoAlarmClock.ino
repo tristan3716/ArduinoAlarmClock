@@ -48,9 +48,8 @@ arduino_clock::lcd_handle::ClockView view;
 void time_pass(){
     time.increase();
 }
-int set_check = 0;              
-int Temp_time[2] = {0,0}
-int level = 0;
+int set_check = 0, level = 0, current = 0;              
+int Temp_time[2] = {0,0};
 /* ============================================
  *    enum of IRsignal values
  *    2019.12.17 - by Jo
