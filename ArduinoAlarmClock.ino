@@ -146,7 +146,8 @@ void loop() {
         if(sig_in == "fn" && set_check != 1){
             arduino_clock::Time *t = new arduino_clock::Time();
             view.setMode(arduino_clock::Clock_View::Mode::setup, t);
-        }elif(sig_in != "fn" && sig_in != "-1" && set_check = 1){
+        }
+        if(sig_in != "fn" && sig_in != "-1" && set_check = 1){
             Temp_time[current] = atoi(sig_in);
             ++current;
             if(current == 2){
@@ -172,7 +173,7 @@ void loop() {
                 set_check = 0;
                 view.setMode(arduino_clock::Clock_View::Mode::Clock,t);
                 level = 0;
-            
+            }
     } //오후 5시에 시험 끝나니 그 후에 수정및 추가 더 하겠습니다. 일단 세팅하는 것만 생각나는 대로 짜봤습니다. by-JO
     
     
