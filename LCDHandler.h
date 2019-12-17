@@ -64,6 +64,10 @@ namespace arduino_clock {
             }
             if (mode != _displayMode) {
                 _frame_rendered = false;
+                if (_displayMode == Mode::Setup) {
+                    traceln("Update time");
+                    *_clock_time = *_printable_time;
+                }
             }
             _printable_time->changed = true;
             _displayMode = mode;
@@ -141,7 +145,8 @@ namespace arduino_clock {
             _printable_time = &_t;
             _clock_time = &_t;
 
-            blink = false;
+            _old_time = 0;
+            _blink = false;
             current_change_position = Position::Hour;
         }
         void render() {
@@ -177,9 +182,9 @@ namespace arduino_clock {
                 }
             }
         }
-        // __declspec(deprecated)
+        
         void clear() {
-            //traceln("clear lcd");
+            traceln("clear lcd");
             lcd->clear();
         }
 
@@ -220,7 +225,7 @@ namespace arduino_clock {
             __print__(5, 0, ':');
         }
         void __render_frame_temperature() const __attribute__((always_inline)) {
-            __print__(9, 0, _face_icon);
+            __print__(9, 0, _current_face_icon);
             __print__(14, 0,
                       "\xDF"
                       "C");
@@ -249,16 +254,16 @@ namespace arduino_clock {
             }
         }
 
-        const char *_blink(const Position &p, const char *fmt) {
-            traceln("blink is called");
+        const char *__blink(const Position &p, const char *fmt) {
+            traceln("_blink is called");
             if (current_change_position == p) {
                 static byte count = 0;
                 ++count;
                 if (count > 2) {
-                    blink = !blink;
+                    _blink = !_blink;
                     count = 0;
                 }
-                if (blink == true) {
+                if (_blink == true) {
                     return "__";
                 }
                 else {
@@ -271,21 +276,21 @@ namespace arduino_clock {
         }
         void print_setup_time() {
             if (_printable_time->is_change() == true) {
-                __print__(0, 0, _blink(Position::Hour, _printable_time->format_hour()));
-                __print__(3, 0, _blink(Position::Minute, _printable_time->format_minute()));
-                __print__(6, 0, _blink(Position::Second, _printable_time->format_second()));
+                __print__(0, 0, __blink(Position::Hour, _printable_time->format_hour()));
+                __print__(3, 0, __blink(Position::Minute, _printable_time->format_minute()));
+                __print__(6, 0, __blink(Position::Second, _printable_time->format_second()));
                 _printable_time->disable_change_flag();
             }
             else {
                 switch (current_change_position) {
                     case Position::Hour:
-                        __print__(0, 0, _blink(Position::Hour, _printable_time->format_hour()));
+                        __print__(0, 0, __blink(Position::Hour, _printable_time->format_hour()));
                         break;
                     case Position::Minute:
-                        __print__(3, 0, _blink(Position::Minute, _printable_time->format_minute()));
+                        __print__(3, 0, __blink(Position::Minute, _printable_time->format_minute()));
                         break;
                     case Position::Second:
-                        __print__(6, 0, _blink(Position::Second, _printable_time->format_second()));
+                        __print__(6, 0, __blink(Position::Second, _printable_time->format_second()));
                         break;
                     default:
                         break;
@@ -302,19 +307,19 @@ namespace arduino_clock {
             diff = diff < 0 ? -diff : diff;
             //traceln("Diff : ", diff);
             if (diff > AngryFaceDiff) {  // ~20, 28~
-                if (_face_icon != Icon::AngryFace) {
-                    _face_icon = Icon::AngryFace;
+                if (_current_face_icon != Icon::AngryFace) {
+                    _current_face_icon = Icon::AngryFace;
                     __print__(9, 0, Icon::AngryFace);
                 }
             }
             else if (diff < SoSoFaceDiff) {  // 22~26
-                if (_face_icon != Icon::SmileFace) {
-                    _face_icon = Icon::SmileFace;
+                if (_current_face_icon != Icon::SmileFace) {
+                    _current_face_icon = Icon::SmileFace;
                     __print__(9, 0, Icon::SmileFace);
                 }
             }
-            else if (_face_icon != Icon::SoSoFace) {  // 20~22, 26~28
-                _face_icon = Icon::SoSoFace;
+            else if (_current_face_icon != Icon::SoSoFace) {  // 20~22, 26~28
+                _current_face_icon = Icon::SoSoFace;
                 __print__(9, 0, Icon::SoSoFace);
             }
             __print__(10, 0, temp, 1);
@@ -336,14 +341,15 @@ namespace arduino_clock {
     private:
         LiquidCrystal_I2C *lcd;
         Time *_printable_time;  // replaceable in setup
-        Time *_clock_time;
-        Position current_change_position;
-        bool blink;
+        Time *_clock_time; // set when initialization
 
-        uint32_t _old_time = 0;
-        const uint32_t _display_delay = 333;
         Mode _displayMode;
-        byte _face_icon;
+        uint32_t _old_time;
+        const uint32_t _display_delay = 333;
+
+        Position current_change_position;
+        bool _blink;
+        byte _current_face_icon;
         bool _frame_rendered;
     };
 };  // namespace arduino_clock

@@ -65,6 +65,16 @@ namespace arduino_clock {
             _buffer[8] = 0;
             return &_buffer[6];
         }
+        Time & operator=(const Time &rhs) {
+            if (this != &rhs) {
+                changed = rhs.changed;
+                hour = rhs.hour;
+                minute = rhs.minute;
+                second = rhs.second;
+            }
+
+            return *this;
+        }
         
     private:
         void _format(int x, int p) __attribute__((always_inline)) {
