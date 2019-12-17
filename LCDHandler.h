@@ -67,6 +67,7 @@ namespace arduino_clock {
                 if (_displayMode == Mode::Setup) {
                     traceln("Update time");
                     *_clock_time = *_printable_time;
+                    _printable_time = _clock_time;
                 }
             }
             _printable_time->changed = true;
@@ -101,6 +102,7 @@ namespace arduino_clock {
             Second = 0b100
         };
         void setPosition(const Position &p) {
+            _printable_time->changed = true;
 #if defined(_DEBUG)
             traceln("Position changed to ");
             switch (p) {

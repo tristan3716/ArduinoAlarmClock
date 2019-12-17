@@ -51,12 +51,12 @@ namespace arduino_clock {
             return _buffer;
         }
         const char *format_hour() {
-            _format(second, 0);
+            _format(hour, 0);
             _buffer[2] = 0;
             return &_buffer[0];
         }
         const char *format_minute() {
-            _format(second, 3);
+            _format(minute, 3);
             _buffer[5] = 0;
             return &_buffer[3];
         }
