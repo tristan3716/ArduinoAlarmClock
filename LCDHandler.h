@@ -65,10 +65,10 @@ namespace arduino_clock {
             if (mode != _displayMode) {
                 _frame_rendered = false;
             }
+            _printable_time->changed = true;
             _displayMode = mode;
         }
         void setMode(Mode mode, Time *_t) {
-            _printable_time = _t;
             if (mode != Mode::Setup) {
                 if (IsDebug()) {
                     cerror("only setup mode with time");
@@ -88,10 +88,11 @@ namespace arduino_clock {
                 release.log("the request is ignored");
                 return;
             }
+            _printable_time = _t;
             traceln("set display to setup mode");
         }
         enum class Position {
-            Hour   = 0b001,
+            Hour = 0b001,
             Minute = 0b010,
             Second = 0b100
         };
@@ -117,7 +118,7 @@ namespace arduino_clock {
 
     public:
         /* ========================================
-        * externally released functions except that related to mode
+        * externally released functions except that related to set mode
         *   init(Time)
         *   render()
         */
@@ -147,11 +148,13 @@ namespace arduino_clock {
             if (is_delay()) {
                 switch (_displayMode) {
                     case Mode::Alarm:
-                        traceln("render (Alarm mode)");
+                        clear();
+                        //traceln("render (Alarm mode)");
                         if (_frame_rendered == false) {
                             //_renderFrame();
                             _frame_rendered = true;
                         }
+                        __print__(0, 0, "Alarm..."); 
                         break;
                     case Mode::Clock:
                         if (_frame_rendered == false) {
@@ -162,7 +165,6 @@ namespace arduino_clock {
                         printDHT();
                         break;
                     case Mode::Setup:
-                        traceln("render (Setup mode)");
                         if (_frame_rendered == false) {
                             _renderFrame();
                             _frame_rendered = true;
@@ -176,10 +178,10 @@ namespace arduino_clock {
             }
         }
         // __declspec(deprecated)
-        // void clear() {
-        //     traceln("clear lcd");
-        //     lcd->clear();
-        // }
+        void clear() {
+            //traceln("clear lcd");
+            lcd->clear();
+        }
 
     private:
         /* ========================================
@@ -275,7 +277,7 @@ namespace arduino_clock {
                 _printable_time->disable_change_flag();
             }
             else {
-                switch(current_change_position) {
+                switch (current_change_position) {
                     case Position::Hour:
                         __print__(0, 0, _blink(Position::Hour, _printable_time->format_hour()));
                         break;
@@ -333,7 +335,7 @@ namespace arduino_clock {
 
     private:
         LiquidCrystal_I2C *lcd;
-        Time *_printable_time; // replaceable in setup
+        Time *_printable_time;  // replaceable in setup
         Time *_clock_time;
         Position current_change_position;
         bool blink;
