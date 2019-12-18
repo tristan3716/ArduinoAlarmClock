@@ -50,6 +50,9 @@ void time_pass(){
 }
 int set_check = 0, level = 0, current = 0;              
 int Temp_time[2] = {0,0};
+arduino_clock::Time* t = new arduino_clock::Time();
+arduino_clock::Time* alarm_t = new arduino_clock::Time();
+int alarm_h, alarm_m, alarm_s;
 /* ============================================
  *    enum of IRsignal values
  *    2019.12.17 - by Jo
@@ -141,40 +144,86 @@ void loop() {
     /* Update source write here */
     //! TODO:
     /* turn to setup mode*/
-    if(irrecv.decode(&results){
-        sig_in = decoding();
-        if(sig_in == "fn" && set_check != 1){
-            arduino_clock::Time *t = new arduino_clock::Time();
-            view.setMode(arduino_clock::Clock_View::Mode::setup, t);
+    if(irrecv.decode(&results)){
+        char* sig_in = decoding();
+        Serial.println(sig_in);
+        Serial.println(set_check);
+        if(sig_in == "fn" && set_check == 0){
+            t = new arduino_clock::Time();
+            view.setMode(arduino_clock::ClockView::Mode::Setup, t);
+            set_check = 1;
+            
+        }else if(sig_in == "fn" && set_check == 1){
+          view.setMode(arduino_clock::ClockView::Mode::Clock);
+          alarm_t = new arduino_clock::Time();
+          view.setMode(arduino_clock::ClockView::Mode::Setup, alarm_t);
+          set_check = 2;
         }
-        if(sig_in != "fn" && sig_in != "-1" && set_check = 1){
+
+        
+        if(sig_in != "fn" && sig_in != "-1" && set_check !=0){
+        
             Temp_time[current] = atoi(sig_in);
             ++current;
             if(current == 2){
                 int t_time = Temp_time[0] * 10 + Temp_time[1];
                 switch(level){
                     case 0:
+                        if(set_check == 2){
+                          alarm_h = t_time;
+                          alarm_t -> hour = t_time;
+                          alarm_t -> changed = true;
+                          view.setPosition(arduino_clock::ClockView::Position::Minute);
+                        }else{
                         t->hour = t_time;
                         t->changed = true;
+                        view.setPosition(arduino_clock::ClockView::Position::Minute);
+                        }
                         break;
                     case 1:
-                        t->minuate = t_time;
+                        if(set_check == 2){
+                          alarm_m = t_time;
+                          alarm_t -> minute = t_time;
+                          alarm_t -> changed = true;
+                          view.setPosition(arduino_clock::ClockView::Position::Second);
+                        }else{
+                        t->minute = t_time;
                         t->changed = true;
+                        view.setPosition(arduino_clock::ClockView::Position::Second);
+                        }
                         break;
                     case 2:
+                        if(set_check == 2){
+                          alarm_s = t_time;
+                          alarm_t -> second = t_time;
+                          alarm_t -> changed = true;
+                          view.setPosition(arduino_clock::ClockView::Position::Hour);
+                        }else{
                         t->second = t_time;
                         t->changed = true;
+                        view.setPosition(arduino_clock::ClockView::Position::Hour);
                         break;
+                        }
                 }
                 level++;
                 current = 0;
             }
             if(level == 3){
-                set_check = 0;
-                view.setMode(arduino_clock::Clock_View::Mode::Clock,t);
+                view.setMode(arduino_clock::ClockView::Mode::Clock);
+                set_check--;
                 level = 0;
+                if(set_check != 0){
+                  t = new arduino_clock::Time();
+                  view.setMode(arduino_clock::ClockView::Mode::Setup,t);
+                }
+               
             }
-    } //오후 5시에 시험 끝나니 그 후에 수정및 추가 더 하겠습니다. 일단 세팅하는 것만 생각나는 대로 짜봤습니다. by-JO
+        }
+        irrecv.resume();
+    } //fn키를 한 번 누르면 시간, 두 번 누르면 알람시간 + 시간 이렇게 바뀌도록 했습니다.
+    //알람시간만 따로 바꾸도록 하고싶었는데 어케해야될지 모르겠어 밤 지나고 수정해보겠습니다. 
+    //알람시각 저장변수 alarm_h : 시 alarm_m : 분 alarm_s : 초 
+    //by-JO
     
     
     /* Render source write here */
