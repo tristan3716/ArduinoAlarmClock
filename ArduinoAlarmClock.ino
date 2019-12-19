@@ -59,7 +59,7 @@ void time_pass() {
 }
 
 int set_check = 0, level = 0, current = 0;
-int Temp_time[2] = {0, 0};
+int Temp_time[2] = {0, 0}, int answer[2] = {0, 0};
 arduino_clock::Time* t = new arduino_clock::Time();
 arduino_clock::Time* alarm_t = new arduino_clock::Time();
 int alarm_h, alarm_m, alarm_s;
@@ -244,6 +244,17 @@ void loop() {
                 }
             }
         }
+        if (alarm.isalarmwarn() && current == 0){
+            answer[current++] = atoi(sig_in);
+        }else if(alarm.isalarmwarn() && current == 1{
+            answer[current] = atoi(sig_in);
+            current = 0;
+            int ans = answer[0] * 10 + answer[1];
+            answer = {0,0};
+            alarm.solve = ans;
+        }
+        //알람 문제 답 입력코드 ver1
+        
         irrecv.resume();
     }
 
