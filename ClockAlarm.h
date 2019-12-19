@@ -8,6 +8,7 @@
 
 #include "ClockTime.h"
 #include "trace.h"
+#include "LCDHandler.h"
 
 #define C4 262  // do4
 #define D4 294  // re4
@@ -35,15 +36,14 @@ namespace arduino_clock {
             8, 8, 8, 8, 8, 16, 16, 8, 8, 8, 8, 4, 8, 16, 16, 4, 2, 8, 16, 16, 8, 8,
             16, 16, 16, 16, 4, 2, 8, 8, 8, 8, 8, 16, 16, 8, 8, 16, 16, 16, 16, 4, 2};
     };  // namespace reveille
+
     class Alarm {
     private:
         /* ========================================
-       functions related to alaraming
-    */
+         * functions related to alaraming
+         */
 
     public:
-        Alarm() {
-        }
         void init(Time &t) {
             _old_time = 0;
             _enable = false;
@@ -56,6 +56,10 @@ namespace arduino_clock {
         void enable() __attribute__((always_inline)) {
             _enable = true;
         }
+        void disable() __attribute__((always_inline)) {
+            _enable = false;
+            view.setMode(ClockView::Mode::Clock);
+        }
         void setAlarm(const int alarm_h, const int alarm_m, const int alarm_s) __attribute__((always_inline)) {
             release.log("alarm set to ", alarm_h, ":", alarm_m, ":", alarm_s);
             _seted_alarm_time.hour = alarm_h;
@@ -64,7 +68,7 @@ namespace arduino_clock {
         }
 
         bool isAlarmWarn() const __attribute__((always_inline)) {
-            return _seted_alarm_time == *_real_time || _warn == true;
+            return _enable == true && (_seted_alarm_time == *_real_time || _warn == true);
         }
         void warn() {
             if (_warn == false) {
