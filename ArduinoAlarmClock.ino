@@ -254,7 +254,10 @@ void loop() {
             int ans = answer[0] * 10 + answer[1];
             if(alarm.solve(ans)){
               view.setMode(arduino_clock::ClockView::Mode::Clock);
+            }else{
+                view.reset();
             }
+            
         }
         //알람 문제 답 입력코드 ver3
         
