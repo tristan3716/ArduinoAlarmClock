@@ -139,10 +139,11 @@ namespace arduino_clock {
                 switch (_displayMode) {
                     case Mode::Alarm:
                         if (_frame_rendered == false) {
-                            //_renderFrame();
+                            __render_frame_answer();
                             _frame_rendered = true;
                         }
-                        __print__(0, 0, "Alarm...");
+                        //__print__(0, 0, "Alarm...");
+                        print_problem();
                         break;
                     case Mode::Clock:
                         if (_frame_rendered == false) {
@@ -176,10 +177,16 @@ namespace arduino_clock {
         * functions that communicate with LCD
         */
         void __print__(uint8_t x, uint8_t y, const char *msg) const __attribute__((always_inline)) {
+            ////traceln("write ", msg);
             lcd->setCursor(x, y);
             lcd->print(msg);
         }
+        void __print__(uint8_t x, uint8_t y, int value) const __attribute__((always_inline)) {
+            lcd->setCursor(x, y);
+            lcd->write(value);
+        }
         void __print__(uint8_t x, uint8_t y, uint8_t value) const __attribute__((always_inline)) {
+            ////traceln("write ", value);
             lcd->setCursor(x, y);
             lcd->write(value);
         }
@@ -221,6 +228,10 @@ namespace arduino_clock {
             __render_frame_time();
             __render_frame_temperature();
             __render_frame_humidity();
+        }
+        void __render_frame_answer() const __attribute__((always_inline)) {
+            __print__(10, 0, '_');
+            __print__(11, 0, '_');
         }
 
         /* ========================================
@@ -309,6 +320,30 @@ namespace arduino_clock {
         }
 
         /* ========================================
+        * functions that render problem
+        */
+    public:
+        void set_problem(const char *p) {
+            _problem = p;
+        }
+        void input(int a, int b = -1) {
+            //lcd->setCursor(0, 1);
+            //lcd->print(a);
+            __print__(10, 0, a, 0);
+            if (b != -1) {
+                //lcd->setCursor(1, 1);
+                //lcd->print(b);
+                __print__(11, 0, b, 0);
+            }
+        }
+        void reset() {
+            _frame_rendered = false;
+        }
+    private:
+        void print_problem() __attribute__((always_inline)) {
+            __print__(0, 0, _problem);
+        }
+        /* ========================================
         * functions that check delay
         */
         inline bool is_delay() __attribute__((always_inline)) {
@@ -332,6 +367,8 @@ namespace arduino_clock {
         bool _blink;
         byte _current_face_icon;
         bool _frame_rendered;
+
+        const char *_problem;
     };
 };  // namespace arduino_clock
 

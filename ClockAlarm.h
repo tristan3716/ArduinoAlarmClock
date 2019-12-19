@@ -72,6 +72,7 @@ namespace arduino_clock {
         }
         void warn() {
             if (_warn == false) {
+                generate();
                 release.log(F("Alarm is warn ..."));
                 _old_time = millis();
                 view.setMode(ClockView::Mode::Alarm);
@@ -100,8 +101,41 @@ namespace arduino_clock {
             }
             return false;
         }
-
+    public:
+        void _format(int x, int p) __attribute__((always_inline)) {
+            if (x < 10) {
+                _buffer[p] = ' ';
+            }
+            else {
+                _buffer[p] = x / 10 + '0';
+            }
+            _buffer[p + 1] = x % 10 + '0';
+        }
+        void generate() {
+            traceln("generate problme");
+            int a = random(1, 99);
+            int b = random(max(1,10-a), 100-a);
+            traceln(a, "+", b, "=", a+b);
+            _format(a, 0);
+            _buffer[2] = ' ';
+            _buffer[3] = '+';
+            _buffer[4] = ' ';
+            _format(b, 5);
+            _buffer[7] = ' ';
+            _buffer[8] = '=';
+            _buffer[9] = 0;
+            answer = a+b;
+            view.set_problem(_buffer);
+        }
+        bool solve(int x) const {
+            traceln("answer is ", answer);
+            traceln("res is ", x);
+            return x == answer;
+        }
     private:
+        char _buffer[10];
+    private:
+        int answer;
         Time _seted_alarm_time;
         Time *_real_time;
         bool _enable;
