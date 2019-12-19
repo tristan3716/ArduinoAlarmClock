@@ -10,6 +10,7 @@
  *  P3*, P11* - for tone()
  *  P5*, P6* - for timer for time_increase
  *  P9 - for IR sensor
+ *  p12 - for Alarm Sound
  */
 
 /* ===========================================
@@ -42,8 +43,18 @@ decode_results results;
  *    global variable & method
  *    2019.12.13 v1 - by Hu
  */
+
+#include "ClockAlarm.h"
+arduino_clock::Alarm alarm;
+/*
+*
+*   Alram 
+*   2019.12.18 v1 - by Jh
+*   2019.12.19 v2 - by Jh
+*/ 
+
 arduino_clock::Time time;
-arduino_clock::lcd_handle::ClockView view;
+arduino_clock::ClockView view;
 
 void time_pass(){
     time.increase();
@@ -57,7 +68,7 @@ int alarm_h, alarm_m, alarm_s;
  *    enum of IRsignal values
  *    2019.12.17 - by Jo
  */
-arduino_clock::enum IRSignal {
+enum IRSignal {
    POWER = 0xFD00FF,
      VOLPLUS = 0xFD807F,
      FUNC = 0xFD40BF,
@@ -87,7 +98,7 @@ arduino_clock::enum IRSignal {
  *    2019.12.17 - by Jo
  */
 
-arduino_clock::char* decoding() {
+char* decoding() {
   enum IRSignal IR;
   IR = results.value;
   switch(IR){
@@ -125,7 +136,7 @@ void setup() {
     // initialize Serial
     Serial.begin(9600);
     Serial.println("Serial Start");
-    
+    pinMode(12, OUTPUT);
     // initialize time
     time.init();
     // initialize lcd handler
@@ -138,6 +149,10 @@ void setup() {
     
     // irrecv standby
     irrecv.enableIRIn();
+
+    // alarm
+    alarm.init(time);
+    arduino_clock::Time t;
 }
 
 void loop() {
@@ -204,7 +219,10 @@ void loop() {
                         view.setPosition(arduino_clock::ClockView::Position::Hour);
                         break;
                         }
+                    
                 }
+                alarm.setAlarm( alarm_h, alarm_m, alarm_s);
+                alarm.enable();
                 level++;
                 current = 0;
             }
@@ -220,10 +238,7 @@ void loop() {
             }
         }
         irrecv.resume();
-    } //fn키를 한 번 누르면 시간, 두 번 누르면 알람시간 + 시간 이렇게 바뀌도록 했습니다.
-    //알람시간만 따로 바꾸도록 하고싶었는데 어케해야될지 모르겠어 밤 지나고 수정해보겠습니다. 
-    //알람시각 저장변수 alarm_h : 시 alarm_m : 분 alarm_s : 초 
-    //by-JO
+    }
     
     
     /* Render source write here */
