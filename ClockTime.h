@@ -42,11 +42,11 @@ namespace arduino_clock {
             this->operator++();
         }
         const char *format() {
-            _format(hour, 0); //01
+            _format(hour, 0);  //01
             _buffer[2] = ':';
-            _format(minute, 3); // 34
+            _format(minute, 3);  // 34
             _buffer[5] = ':';
-            _format(second, 6); // 67
+            _format(second, 6);  // 67
             _buffer[8] = 0;
             return _buffer;
         }
@@ -65,7 +65,7 @@ namespace arduino_clock {
             _buffer[8] = 0;
             return &_buffer[6];
         }
-        Time & operator=(const Time &rhs) {
+        Time &operator=(const Time &rhs) {
             if (this != &rhs) {
                 changed = rhs.changed;
                 hour = rhs.hour;
@@ -75,11 +75,15 @@ namespace arduino_clock {
 
             return *this;
         }
-        
+
+        bool operator==(const Time &rhs) const {
+            return hour == rhs.hour && minute == rhs.minute && second == rhs.second;
+        }
+
     private:
         void _format(int x, int p) __attribute__((always_inline)) {
             _buffer[p] = x / 10 + '0';
-            _buffer[p+1] = x % 10 + '0'; 
+            _buffer[p + 1] = x % 10 + '0';
         }
         void operator++() __attribute__((always_inline)) {
             ++second;
@@ -97,6 +101,6 @@ namespace arduino_clock {
             }
         }
     };
-};
+};  // namespace arduino_clock
 
-#endif //! _CLOCK_TIME_H
+#endif  //! _CLOCK_TIME_H

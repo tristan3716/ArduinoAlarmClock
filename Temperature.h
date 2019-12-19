@@ -16,6 +16,4 @@ float getHumidity() {
     return dht.readHumidity();
 }
 
-
-
 #endif //! _TEMPERATURE_H

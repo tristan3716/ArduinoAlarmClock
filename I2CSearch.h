@@ -43,7 +43,7 @@ public:
             traceln("Multiple device is available - address ", first_found, " retruned");
         }
 
-        traceln("End scanning I2C address!");
+        traceln("End scanning I2C address!\n");
         return first_found;
     }
 };
