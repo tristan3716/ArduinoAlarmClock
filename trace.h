@@ -53,15 +53,20 @@ public:
     void init() {
         Serial.begin(9600);
     }
-    template <typename T>
-    inline void log(T x) {
-        _loggerln(x);
+    template <typename T, typename... Ts>
+    void log(T x) {
+        Serial.println(x);
     }
-};
+    template <typename T, typename... Ts>
+    void log(T x, Ts... xs) {
+        Serial.print(x);
+        log(xs...);
+    }
+} release;
 extern ReleaseLog release;
-ReleaseLog release;
 
-void cerror(const char *msg) {
+template <typename T>
+void cerror(T *msg) {
     _loggerln("!! critical error : ", msg);
     delay(1000);
     noInterrupts();
