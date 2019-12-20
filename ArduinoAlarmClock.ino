@@ -51,7 +51,7 @@ arduino_clock::Alarm alarm;
 
 uint32_t ot;
 uint32_t dt = 1000;
-//arduino_clock::Time time;
+arduino_clock::Time time;
 //arduino_clock::ClockView view;
 
 void time_pass() {

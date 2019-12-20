@@ -8,6 +8,8 @@
 #if !defined(_CLOCK_TIME_H)
 #define _CLOCK_TIME_H
 
+#include <TimerOne.h>
+
 namespace arduino_clock {
     class Time {
     public:
@@ -100,8 +102,5 @@ namespace arduino_clock {
         }
     };
 };  // namespace arduino_clock
-
-extern arduino_clock::Time time;
-
 
 #endif  //! _CLOCK_TIME_H
