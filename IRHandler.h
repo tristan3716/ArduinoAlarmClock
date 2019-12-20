@@ -1,5 +1,6 @@
 #if !defined(_IR_HANDLER_H)
 #define _IR_HANDLER_H
+#include "ClockTime.h"
 
 int set_check = 0, level = 0, current = 0, a_current = 0;
 int Temp_time[2] = {0, 0}, answer[2] = {0, 0};
@@ -144,6 +145,7 @@ void IRProcess() {
                 view.setMode(arduino_clock::ClockView::Mode::Clock);
                 set_check--;
                 level = 0;
+                time = *t;
                 if (set_check != 0) {
                     alarm.setAlarm(alarm_h, alarm_m, alarm_s);
                     alarm.enable();
