@@ -53,13 +53,21 @@ namespace arduino_clock {
             duration = 16 / reveille::noteDurations[thisNote];
             _real_time = &t;
         }
+
         void enable() __attribute__((always_inline)) {
+            thisNote = 0;
+            _warn = false;
+            duration = 16 / reveille::noteDurations[thisNote];
             _enable = true;
         }
         void disable() __attribute__((always_inline)) {
             _enable = false;
             view.setMode(ClockView::Mode::Clock);
         }
+        bool isAlarmWarn() const __attribute__((always_inline)) {
+            return _enable == true && (_seted_alarm_time == *_real_time || _warn == true);
+        }
+
         void setAlarm(const int alarm_h, const int alarm_m, const int alarm_s) __attribute__((always_inline)) {
             release.log("alarm set to ", alarm_h, ":", alarm_m, ":", alarm_s);
             _seted_alarm_time.hour = alarm_h;
@@ -67,9 +75,6 @@ namespace arduino_clock {
             _seted_alarm_time.second = alarm_s;
         }
 
-        bool isAlarmWarn() const __attribute__((always_inline)) {
-            return _enable == true && (_seted_alarm_time == *_real_time || _warn == true);
-        }
         void warn() {
             if (_warn == false) {
                 generate();
@@ -77,7 +82,7 @@ namespace arduino_clock {
                 _old_time = millis();
                 view.setMode(ClockView::Mode::Alarm);
                 _warn = true;
-                tone(12, reveille::melody[thisNote], tempo * reveille::noteDurations[thisNote]);
+                tone(12, reveille::melody[thisNote], tempo * 16 / reveille::noteDurations[thisNote]);
             }
             if (is_delay()) {
                 duration--;
