@@ -12,9 +12,9 @@
 #define trace(fmt, ...) _logger(fmt, ##__VA_ARGS__)
 #define traceBegin() Serial.begin(9600)
 #else
-#define traceln(fmt, ...)
-#define trace(fmt, ...)
-#define traceBegin()
+#define traceln(fmt, ...) {}
+#define trace(fmt, ...) {}
+#define traceBegin() {}
 #endif
 
 #if defined(_DEBUG)
