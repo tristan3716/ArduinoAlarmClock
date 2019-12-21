@@ -15,50 +15,10 @@
  *  P7 - for DHT
  */
 
-/* ===========================================
- *    Time class
- *    2019.12.14 v2 - by Hu
- */
 #include "ClockTime.h"
-
-/* ===========================================
- *    LCD Handler
- *    2019.12.14 v2 - by Hu
- */
 #include "LCDHandler.h"
-
-/* ===========================================
- *    IR Library - IRremote
- */
-
-#include <IRremote.h>
-int IRpin = 9;
-IRrecv irrecv(IRpin);
-decode_results results;
-
-/* ===========================================
- *   Alram 
- *   2019.12.17 v1 - by Jh
- *   2019.12.19 v2 - by Jh
- */
-
-#include "ClockAlarm.h"
-arduino_clock::Alarm alarm;
-/* ===========================================
- *    global variable & method
- *    2019.12.13 v1 - by Hu
- */
-
-uint32_t ot;
-uint32_t dt = 1000;
-//arduino_clock::Time time;
-//arduino_clock::ClockView view;
-
-void time_pass() {
-    time.increase();
-}
-
 #include "IRHandler.h"
+#include "ClockAlarm.h"
 
 /* ===========================================
  *    Arduino main
@@ -67,29 +27,19 @@ void setup() {
     randomSeed(analogRead(A0));
     release.init();
     release.log(F("Arduino Alarm Clock v1220"));
-
-    pinMode(12, OUTPUT);
-
-    // initialize time
-    time.init();
-    // initialize lcd handler
-    view.init(time);
     
-    // irrecv standby
-    irrecv.enableIRIn();
-
-    // alarm
-    alarm.init(time);
-
-    ot = millis();
+    // initialize time
+    real_time.init();
+    // initialize lcd handler
+    view.init(real_time);
+    // initialize alarm
+    alarm.init(real_time);
+    IRinit();
 }
 
 void loop() {
     /* Clock Timer */
-    if (ot + dt < millis()) {
-        ot = ot + dt;
-        time_pass();
-    }
+    time_pass();
 
     /* Update source write here */
     if (irrecv.decode(&results)) {

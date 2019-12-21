@@ -10,6 +10,8 @@
 #include "trace.h"
 #include "LCDHandler.h"
 
+#define BUZZER_PIN 12
+
 #define C4 262  // do4
 #define D4 294  // re4
 #define E4 330  // mi4
@@ -38,13 +40,9 @@ namespace arduino_clock {
     };  // namespace reveille
 
     class Alarm {
-    private:
-        /* ========================================
-         * functions related to alaraming
-         */
-
     public:
         void init(Time &t) {
+            pinMode(BUZZER_PIN, OUTPUT);
             _old_time = 0;
             _enable = false;
             _warn = false;
@@ -108,7 +106,6 @@ namespace arduino_clock {
             }
             return false;
         }
-    public:
         void _format(int x, int p) __attribute__((always_inline)) {
             if (x < 10) {
                 _buffer[p] = ' ';
@@ -134,6 +131,7 @@ namespace arduino_clock {
             answer = a+b;
             view.set_problem(_buffer);
         }
+    public:
         bool solve(int x) const {
             traceln("answer is ", answer);
             traceln("res is ", x);
@@ -155,5 +153,8 @@ namespace arduino_clock {
         byte current_;
     };
 };  // namespace arduino_clock
+
+arduino_clock::Alarm alarm;
+extern arduino_clock::Alarm alarm;
 
 #endif  //! _CLOCK_ALARM_H

@@ -1,25 +1,18 @@
-/* ===========================================
- *    LCD Handler
- *    2019.12.13 v1 - by Hu
- *        make sekeleton
- *        make print print_clock_time
- *    2019.12.14 v2 - by Hu
- *        make render()
- *        conceal almost functions except render(), init(), clear(), setMode()
- */
 #if !defined(_LCD_HANDLER_H)
 #define _LCD_HANDLER_H
 
-#include "CustomCharacter.h"
-#include "I2CSearch.h"
 #include "trace.h"
 
+#include "I2CSearch.h"
+#include "CustomCharacter.h"
 #include "Temperature.h"
+
 
 #include <LiquidCrystal_I2C.h>
 
 #define AngryFaceDiff 4
 #define SoSoFaceDiff 2
+
 #define SmileFaceMid 24
 
 namespace arduino_clock {
