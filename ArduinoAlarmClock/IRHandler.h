@@ -1,6 +1,19 @@
 #if !defined(_IR_HANDLER_H)
 #define _IR_HANDLER_H
 #include "ClockTime.h"
+#include "IRremote.h"
+#include "ClockAlarm.h"
+
+#define IRPIN  9
+IRrecv irrecv(IRPIN);
+decode_results results;
+extern IRrecv irrecv;
+extern decode_results results;
+
+void IRinit() {
+    // irrecv standby
+    irrecv.enableIRIn();
+}
 
 int set_check = 0, level = 0, current = 0, a_current = 0;
 int Temp_time[2] = {0, 0}, answer[2] = {0, 0};
@@ -12,7 +25,7 @@ int alarm_h, alarm_m, alarm_s;
  *    enum of IRsignal values
  *    2019.12.17 - by Jo
  */
-enum IRSignal {
+enum IRSignal : long unsigned int {
     POWER = 0xFD00FF,
     VOLPLUS = 0xFD807F,
     FUNC = 0xFD40BF,
@@ -42,9 +55,9 @@ enum IRSignal {
  *    2019.12.17 - by Jo
  */
 
-char* decoding() {
-    enum IRSignal IR;
-    IR = results.value;
+const char* decoding() {
+    IRSignal IR;
+    IR = (IRSignal)results.value;
     switch (IR) {
         case N1:
             return "1";
@@ -74,7 +87,7 @@ char* decoding() {
 }
 
 void IRProcess() {
-    char* sig_in = decoding();
+    const char* sig_in = decoding();
         Serial.println(sig_in);
         Serial.println(set_check);
         Serial.println(alarm.isAlarmWarn());
@@ -150,7 +163,7 @@ void IRProcess() {
                 }
                 set_check--;
                 level = 0;
-                time = *t;
+                real_time = *t;
                 if (set_check != 0) {
                     alarm.setAlarm(alarm_h, alarm_m, alarm_s);
                     alarm.enable();
