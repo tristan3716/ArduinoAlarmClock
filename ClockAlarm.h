@@ -55,15 +55,17 @@ namespace arduino_clock {
         }
 
         void enable() __attribute__((always_inline)) {
-            thisNote = 0;
-            _warn = false;
-            duration = 16 / reveille::noteDurations[thisNote];
             _enable = true;
         }
+        
         void disable() __attribute__((always_inline)) {
             _enable = false;
+            _warn = false;
+            thisNote = 0;
+            duration = 16 / reveille::noteDurations[thisNote];
             view.setMode(ClockView::Mode::Clock);
         }
+
         bool isAlarmWarn() const __attribute__((always_inline)) {
             return _enable == true && (_seted_alarm_time == *_real_time || _warn == true);
         }

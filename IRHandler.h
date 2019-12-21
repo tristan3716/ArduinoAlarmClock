@@ -142,7 +142,12 @@ void IRProcess() {
                 current = 0;
             }
             if (level == 3) {
-                view.setMode(arduino_clock::ClockView::Mode::Clock);
+                if (set_check == 1) {
+                    view.setMode(arduino_clock::ClockView::Mode::Clock);
+                }
+                else {
+                    view.setMode(arduino_clock::ClockView::Mode::Clock, false);
+                }
                 set_check--;
                 level = 0;
                 time = *t;
