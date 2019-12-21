@@ -33,7 +33,7 @@ namespace arduino_clock {
             Setup,
             Clock
         };
-        void setMode(Mode mode) {
+        void setMode(Mode mode, bool flag = true) {
             if (mode == Mode::Setup) {
                 if (IsDebug()) {
                     cerror(F("time parameters must be passed to switch to setup mode"));
@@ -60,7 +60,9 @@ namespace arduino_clock {
             if (mode != _displayMode) {
                 _frame_rendered = false;
                 if (_displayMode == Mode::Setup) {
-                    *_clock_time = *_printable_time;
+                    if (flag == true) {
+                        *_clock_time = *_printable_time;
+                    }
                     _printable_time = _clock_time;
                 }
             }
