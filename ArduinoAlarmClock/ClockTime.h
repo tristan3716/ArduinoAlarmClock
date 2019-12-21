@@ -85,7 +85,7 @@ namespace arduino_clock {
             _buffer[p] = x / 10 + '0';
             _buffer[p + 1] = x % 10 + '0';
         }
-        void operator++() __attribute__((always_inline)) {
+        void operator++() {
             ++second;
             if (second == 60) {
                 changed = true;
@@ -103,6 +103,27 @@ namespace arduino_clock {
     };
 };  // namespace arduino_clock
 
-extern arduino_clock::Time time;
+#define SECOND 1000
+namespace {
+    uint32_t _old_time = millis();
+    
+    inline bool is_delay() {
+        if (_old_time + SECOND < millis()) {
+            _old_time = _old_time + SECOND;
+            return true;
+        }
+        return false;
+    }
+}
+arduino_clock::Time real_time;
+
+
+void time_pass() {
+    if (is_delay()) {
+        real_time.increase();
+    }
+}
+
+extern arduino_clock::Time real_time;
 
 #endif  //! _CLOCK_TIME_H
